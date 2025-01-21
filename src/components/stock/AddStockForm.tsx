@@ -5,15 +5,18 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Plus, X } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 import type { StockItem, StockVariant } from "@/pages/Stock";
 
 type AddStockFormProps = {
   open: boolean;
   onClose: () => void;
   onSubmit: (item: Omit<StockItem, "id" | "createdAt">) => void;
+  existingItems: StockItem[];
 };
 
-const AddStockForm = ({ open, onClose, onSubmit }: AddStockFormProps) => {
+const AddStockForm = ({ open, onClose, onSubmit, existingItems }: AddStockFormProps) => {
+  const { toast } = useToast();
   const [formData, setFormData] = useState({
     name: "",
     price: "",
@@ -24,8 +27,33 @@ const AddStockForm = ({ open, onClose, onSubmit }: AddStockFormProps) => {
     { size: "", color: "", quantity: 0 },
   ]);
 
+  const checkDuplicateVariant = (name: string, newVariant: Omit<StockVariant, "id">) => {
+    const existingItem = existingItems.find(item => item.name.toLowerCase() === name.toLowerCase());
+    if (!existingItem) return false;
+
+    return existingItem.variants.some(variant => 
+      variant.size?.toLowerCase() === newVariant.size?.toLowerCase() &&
+      variant.color?.toLowerCase() === newVariant.color?.toLowerCase()
+    );
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Check for duplicate variants
+    const hasDuplicates = variants.some(variant => 
+      checkDuplicateVariant(formData.name, variant)
+    );
+
+    if (hasDuplicates) {
+      toast({
+        title: "Duplicate Variant",
+        description: "This product variant already exists in the inventory.",
+        variant: "destructive"
+      });
+      return;
+    }
+
     onSubmit({
       name: formData.name,
       price: Number(formData.price),
@@ -36,6 +64,7 @@ const AddStockForm = ({ open, onClose, onSubmit }: AddStockFormProps) => {
         quantity: Number(variant.quantity),
       })),
     });
+    
     setFormData({ name: "", price: "", description: "" });
     setVariants([{ size: "", color: "", quantity: 0 }]);
   };

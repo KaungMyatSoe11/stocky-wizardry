@@ -105,6 +105,7 @@ const Stock = () => {
         open={showAddForm}
         onClose={() => setShowAddForm(false)}
         onSubmit={handleAddStock}
+        existingItems={stockItems}
       />
     </div>
   );
