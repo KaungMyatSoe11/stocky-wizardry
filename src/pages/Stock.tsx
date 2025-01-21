@@ -5,14 +5,20 @@ import { Input } from "@/components/ui/input";
 import AddStockForm from "@/components/stock/AddStockForm";
 import StockOverview from "@/components/stock/StockOverview";
 import StockTable from "@/components/stock/StockTable";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
+
+export type StockVariant = {
+  size?: string;
+  color?: string;
+  quantity: number;
+};
 
 export type StockItem = {
   id: string;
   name: string;
-  quantity: number;
   price: number;
   description: string;
+  variants: StockVariant[];
   createdAt: Date;
 };
 
@@ -36,11 +42,13 @@ const Stock = () => {
     });
   };
 
-  const handleAdjustStock = (id: string, adjustment: number) => {
+  const handleAdjustStock = (id: string, variantIndex: number, adjustment: number) => {
     setStockItems((prev) =>
       prev.map((item) => {
         if (item.id === id) {
-          const newQuantity = item.quantity + adjustment;
+          const updatedVariants = [...item.variants];
+          const newQuantity = updatedVariants[variantIndex].quantity + adjustment;
+          
           if (newQuantity < 0) {
             toast({
               title: "Error",
@@ -49,7 +57,13 @@ const Stock = () => {
             });
             return item;
           }
-          return { ...item, quantity: newQuantity };
+          
+          updatedVariants[variantIndex] = {
+            ...updatedVariants[variantIndex],
+            quantity: newQuantity,
+          };
+          
+          return { ...item, variants: updatedVariants };
         }
         return item;
       })

@@ -12,7 +12,7 @@ import type { StockItem } from "@/pages/Stock";
 
 type StockTableProps = {
   items: StockItem[];
-  onAdjustStock: (id: string, adjustment: number) => void;
+  onAdjustStock: (id: string, variantIndex: number, adjustment: number) => void;
 };
 
 const StockTable = ({ items, onAdjustStock }: StockTableProps) => {
@@ -24,7 +24,7 @@ const StockTable = ({ items, onAdjustStock }: StockTableProps) => {
             <TableHead>Name</TableHead>
             <TableHead>Description</TableHead>
             <TableHead className="text-right">Price</TableHead>
-            <TableHead className="text-right">Quantity</TableHead>
+            <TableHead>Variants</TableHead>
             <TableHead className="text-right">Actions</TableHead>
           </TableRow>
         </TableHeader>
@@ -34,24 +34,40 @@ const StockTable = ({ items, onAdjustStock }: StockTableProps) => {
               <TableCell className="font-medium">{item.name}</TableCell>
               <TableCell>{item.description}</TableCell>
               <TableCell className="text-right">${item.price.toFixed(2)}</TableCell>
-              <TableCell className="text-right">{item.quantity}</TableCell>
-              <TableCell className="text-right">
-                <div className="flex justify-end gap-2">
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    onClick={() => onAdjustStock(item.id, -1)}
-                  >
-                    <ArrowDownCircle className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    onClick={() => onAdjustStock(item.id, 1)}
-                  >
-                    <ArrowUpCircle className="h-4 w-4" />
-                  </Button>
+              <TableCell>
+                <div className="space-y-2">
+                  {item.variants.map((variant, index) => (
+                    <div key={index} className="flex items-center justify-between gap-2 text-sm">
+                      <span>
+                        {variant.size && variant.color
+                          ? `${variant.size} - ${variant.color}`
+                          : variant.size || variant.color || "Default"}
+                      </span>
+                      <span className="font-medium">Qty: {variant.quantity}</span>
+                      <div className="flex gap-1">
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          className="h-6 w-6"
+                          onClick={() => onAdjustStock(item.id, index, -1)}
+                        >
+                          <ArrowDownCircle className="h-3 w-3" />
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          className="h-6 w-6"
+                          onClick={() => onAdjustStock(item.id, index, 1)}
+                        >
+                          <ArrowUpCircle className="h-3 w-3" />
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
                 </div>
+              </TableCell>
+              <TableCell className="text-right">
+                {/* Additional actions can be added here */}
               </TableCell>
             </TableRow>
           ))}

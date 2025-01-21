@@ -8,8 +8,13 @@ type StockOverviewProps = {
 
 const StockOverview = ({ items }: StockOverviewProps) => {
   const totalItems = items.length;
-  const totalValue = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
-  const lowStockItems = items.filter((item) => item.quantity < 10).length;
+  const totalValue = items.reduce((sum, item) => {
+    const totalQuantity = item.variants.reduce((qty, variant) => qty + variant.quantity, 0);
+    return sum + item.price * totalQuantity;
+  }, 0);
+  const lowStockItems = items.filter((item) => 
+    item.variants.some((variant) => variant.quantity < 10)
+  ).length;
 
   return (
     <div className="grid gap-4 md:grid-cols-3">
